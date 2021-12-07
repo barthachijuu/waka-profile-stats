@@ -1,2 +1,1 @@
-# waka-profile-stats
-Wakatime Metrics Profile Readme.
+# Your Dev Metrics in your Readme Profile
