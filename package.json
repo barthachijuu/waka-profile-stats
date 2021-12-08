@@ -8,7 +8,6 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "axios": "^0.24.0",
     "wakatime-client": "^2.7.0"
   }
 }
