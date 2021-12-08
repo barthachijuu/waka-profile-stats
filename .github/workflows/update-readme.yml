@@ -1,12 +1,12 @@
 name: Update gist with WakaTime stats
 on:
-  workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
 jobs:
-  update-readme:
+  update-gist:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
       - name: Update gist
         uses: barthachijuu/waka-profile-stats@feature/wakaApi
         env:
