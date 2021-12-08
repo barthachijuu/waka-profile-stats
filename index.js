@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 const { WakaTimeClient, RANGE } = require("wakatime-client");
-const {
-  WAKATIME_API_KEY: wakatimeApiKey
-} = process.env;
+
+const { WAKATIME_API_KEY: wakatimeApiKey } = process.env;
 
 const wakatime = new WakaTimeClient(wakatimeApiKey);
 
