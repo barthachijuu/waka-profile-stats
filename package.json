@@ -1,0 +1,14 @@
+{
+  "name": "waka-profile-stats",
+  "version": "1.0.0",
+  "description": "Wakatime Metrics Profile Readme",
+  "main": "index.js",
+  "repository": "https://github.com/barthachijuu/waka-profile-stats.git",
+  "author": "Bartolo Amico <bartolo.amico@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "axios": "^0.24.0",
+    "wakatime-client": "^2.7.0"
+  }
+}
