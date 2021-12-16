@@ -4629,7 +4629,7 @@ const {
     GQ_TOKEN: graphqlToken,
  } = process.env;
 
-console.log(env);
+console.log(process.env);
 const wakatime = new WakaTimeClient(wakatimeApiKey);
 const repos = (/* unused pure expression or super */ null && ([]));
 const readme = (/* unused pure expression or super */ null && (``));
