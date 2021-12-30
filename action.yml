@@ -6,45 +6,88 @@ inputs:
   GH_TOKEN:
     description: "GitHub access token with Repo scope"
     required: true
-    default: ${{ github.token }}
+
+  GQ_TOKEN:
+    description: "GitHub access token with Global scope"
+    required: true
 
   WAKATIME_API_KEY:
     description: "Your Wakatime/Wakapi/Hakatime API Key"
     required: true
 
-  API_BASE_URL:
-    description: "Aternative API base URL when using a third-party WakaTime backend"
-    default: "https://wakatime.com/api"
+  SHOW_TOTAL_TIME:
+    description: "Show the total time you have coded"
+    default: false
     required: false
 
-  REPOSITORY:
-    description: "Your GitHub repository"
-    default: ${{ github.repository }}
+  SHOW_PROFILE:
+    description: "Show the current profile views"
+    default: false
     required: false
 
-  SHOW_TITLE:
-    description: "Displays the week number and days in Readme as title"
+  SHORT_INFO:
+    description: "Show the profile info like, repos, follower, etc"
+    default: false
+    required: false
+
+  SHOW_WAKASTAT:
+    description: "Show the watatime statistics"
+    default: true
+    required: false
+
+  SHOW_COMMIT:
+    description: "Show the commit list for the current day"
+    default: false
+    required: false
+
+  SHOW_WEEK:
+    description: "Show the commit list for the current week"
+    default: false
+    required: false
+
+  SHOW_LANGUAGE:
+    description: "Show the languages you uses on your repo"
+    default: false
+    required: false
+
+  SHOW_EDITORS:
+    description: "Show which editors you use"
+    default: false
+    required: false
+
+  SHOW_OS:
+    description: "Show which OS you use"
+    default: false
+    required: false
+
+  SHOW_PROJECTS:
+    description: "Show the projects yuo are working on"
+    default: false
+    required: false
+
+  SHOW_LANGUAGE_PER_REPO:
+    description: "Show language or framework used across different repository"
+    default: false
+    required: false
+
+  SHOW_UPDATE_DATE:
+    description: "Show the upadte date of the readme"
+    default: false
+    required: false
+
+  COMMIT_BY_ME:
+    description: "Git commit with your github user name"
     default: false
     required: false
 
   COMMIT_MESSAGE:
     description: "Add a commit message of your choice"
-    default: "Updated the Graph with new Metrics"
-    required: false
-
-  BLOCKS:
-    description: "Add the progress blocks of your choice"
-    default: "░▒▓█"
-    required: false
-
-  SHOW_TIME:
-    description: "Displays the amount of time spent in each language"
-    default: true
+    default: "Updated Readme with Waka Stats"
     required: false
 
 runs:
-  using: "docker"
-  image: "Dockerfile"
+  using: "node12"
+  main: "dist/index.js"
 
 branding:
   icon: "info"

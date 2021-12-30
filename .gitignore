@@ -1,2 +1,3 @@
 # Local VS code configurations
 .vscode/
+node_modules/
