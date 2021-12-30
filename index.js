@@ -20,7 +20,6 @@ const {
   SHOW_PROJECTS: showProject,
   SHOW_LANGUAGE_PER_REPO: showLanguagePerRepo,
   SHOW_UPDATE_DATE: showUpdateDate,
-  COMMIT_BY_ME: commitByMe,
   INPUT_COMMIT_MESSAGE: commitMessage,
  } = process.env;
 
@@ -39,7 +38,7 @@ const gitProfile = {
 }
 
 const commitData = {
-  owner: 'readme-bot',
+  owner: '',
   repo: '',
   message: commitMessage || 'Update Readme with Waka Stats'
 
@@ -84,6 +83,7 @@ function initialize() {
         commitData.sha = d.response.sha;
         commitData.path = d.response.path;
         commitData.repo = gitProfile.userName;
+        commitData.owner = gitProfile.userName;
         const buff = new Buffer.from(d.response.content, 'base64');
         const rdme = buff.toString('utf-8');
         resolve(rdme)
@@ -365,9 +365,7 @@ function generateNewReadme(readme, stats) {
     string = `${string}⌚ ***Last Stats Update on***\n${last_update.toUTCString()}`;
   }
   const newreadme = await generateNewReadme(readme, string);
-  if(commitByMe == 'true') {
-    commitData.owner = gitProfile.userName;
-  }
+
   if(newreadme != readme) {
     commitData.content = new Buffer.from(newreadme).toString('base64');
     const result = await octokit.repos.createOrUpdateFileContents(commitData);

@@ -1,7 +1,6 @@
 name: "WakaTime - Profile Stats"
 author: Barthachijuu
 description: "Add a Wakatime Coding Activity graph in your Readme"
-
 inputs:
   GH_TOKEN:
     description: "GitHub access token with Repo scope"
@@ -72,11 +71,6 @@ inputs:
 
   SHOW_UPDATE_DATE:
     description: "Show the upadte date of the readme"
-    default: false
-    required: false
-
-  COMMIT_BY_ME:
-    description: "Git commit with your github user name"
     default: false
     required: false
 

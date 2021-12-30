@@ -11297,7 +11297,7 @@ const {
   WAKATIME_API_KEY: wakatimeApiKey,
   GH_TOKEN: gitHubToken,
   GQ_TOKEN: graphqlToken,
-  SHOW_TIME: showTime,
+  SHOW_TOTAL_TIME: showTime,
   SHOW_PROFILE: showProfile,
   SHORT_INFO: shortInfo,
   SHOW_WAKASTAT: showWakaStat,
@@ -11309,7 +11309,6 @@ const {
   SHOW_PROJECTS: showProject,
   SHOW_LANGUAGE_PER_REPO: showLanguagePerRepo,
   SHOW_UPDATE_DATE: showUpdateDate,
-  COMMIT_BY_ME: commitByMe,
   INPUT_COMMIT_MESSAGE: commitMessage,
  } = process.env;
 
@@ -11328,7 +11327,7 @@ const gitProfile = {
 }
 
 const commitData = {
-  owner: 'readme-bot',
+  owner: '',
   repo: '',
   message: commitMessage || 'Update Readme with Waka Stats'
 
@@ -11373,6 +11372,7 @@ function initialize() {
         commitData.sha = d.response.sha;
         commitData.path = d.response.path;
         commitData.repo = gitProfile.userName;
+        commitData.owner = gitProfile.userName;
         const buff = new Buffer.from(d.response.content, 'base64');
         const rdme = buff.toString('utf-8');
         resolve(rdme)
@@ -11405,7 +11405,7 @@ function getStats() {
     }
     if (showWakaStat == 'true') {
         prom.push(gitUtils.wakatimeApi(`stats/last_7_days?api_key=${wakatimeApiKey}`, 'userStat'));
-    }
+      }
     if (showCommit == 'true') {
         prom.push(gitUtils.gitApiGraphQl(graphqlToken, gitUtils.substitute(repoQuery.contributedQuery, '$username', gitProfile.userName), {}, 'contributed'));
     }
@@ -11486,7 +11486,7 @@ function generateCommitList(repos, stat) {
       let target = [];
       for (let c of values) {
         if (c.response.repository.defaultBranchRef != null) {
-         target = target.concat(c.response.repository.defaultBranchRef.target.history.edges)
+          target = target.concat(c.response.repository.defaultBranchRef.target.history.edges)
         }
       }
       for (let c of target) {
@@ -11498,10 +11498,10 @@ function generateCommitList(repos, stat) {
             dayPeriod.night += 1;
         } else if (hour <= 6 && hour < 12) {
             dayPeriod.morning += 1;
-        } else if (hour <= 12 && hour < 18) {
+          } else if (hour <= 12 && hour < 18) {
             dayPeriod.daytime += 1;
         } else if (hour <= 18 && hour < 24) {
-            dayPeriod.evening += 1;
+          dayPeriod.evening += 1;
         }
       }
       sumAll = Object.values(dayPeriod).reduce((a, b) => a + b);
@@ -11625,7 +11625,7 @@ function generateLanguagePerRepo(repos){
       const extension = lang[label].count === 1 ? ' repo' : ' repos';
       data.push({ name: label, text: `${String(lang[label].count)}${extension}`, percent: perc });
     }
-    const string = `***I Mostly Code in${makeStandardList(data)}\n`;
+    const string = `***I Mostly Code in***${makeStandardList(data)}\n`;
     resolve(string);
   });
 }
@@ -11647,27 +11647,23 @@ function generateNewReadme(readme, stats) {
   const wakaStat = await generateCommitList(stats.repos, stats.userStat);
   string = `${string}${stats.stats}${wakaStat}`;
   if(showLanguagePerRepo == 'true') {
-   string = `${string}${await generateLanguagePerRepo(repos)}\n\n`;
+    string = `${string}${await generateLanguagePerRepo(repos)}\n\n`;
   }
   if(showUpdateDate == 'true'){
     const last_update = new Date();
     string = `${string}⌚ ***Last Stats Update on***\n${last_update.toUTCString()}`;
   }
   const newreadme = await generateNewReadme(readme, string);
-  if(commitByMe == 'true') {
-    commitData.owner = gitProfile.userName;
-  }
+
   if(newreadme != readme) {
-    commitData.content = new Buffer.from(readme).toString('base64');
-    console.log(commitData)
-    // const result = await octokit.repos.createOrUpdateFileContents(commitData);
+    commitData.content = new Buffer.from(newreadme).toString('base64');
+    const result = await octokit.repos.createOrUpdateFileContents(commitData);
     console.log(`Readme updated ${result.status}`);
   }
   const end_time = new Date;
   console.log(`End on ${end_time.toLocaleString()}`)
   console.log(`Program processed in ${Math.round((end_time.getTime() - date.getTime()) / 1000)} seconds\n`)
 })();
-
 
 })();
 
