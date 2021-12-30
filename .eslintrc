@@ -1,8 +1,7 @@
 {
   "parser": "babel-eslint",
   "extends": [
-    "airbnb",
-    "plugin:jest/recommended"
+    "airbnb-base"
   ],
   "plugins": [
     "import",
@@ -13,7 +12,7 @@
     "sourceType": "module",
     "allowImportExportEverywhere": true,
     "ecmaFeatures": {
-      "impliedStrict": true,
+      "impliedStrict": true
     }
   },
   "env": {
