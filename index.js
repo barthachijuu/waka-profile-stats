@@ -7,7 +7,6 @@ const repoQuery = require('./query');
 const {
   WAKATIME_API_KEY: wakatimeApiKey,
   GH_TOKEN: gitHubToken,
-  GQ_TOKEN: graphqlToken,
   SHOW_TOTAL_TIME: showTime,
   SHOW_PROFILE: showProfile,
   SHORT_INFO: shortInfo,
@@ -76,11 +75,11 @@ function makeCommitList (list){
 
 function initialize() {
   return new Promise((resolve, reject) => {
-    gitUtils.gitApiGraphQl(graphqlToken, repoQuery.userInfoQuery).then(d => {
+    gitUtils.gitApiGraphQl(gitHubToken, repoQuery.userInfoQuery).then(d => {
       gitProfile.userId = d.response.viewer.id;
       gitProfile.userEmail = d.response.viewer.email;
       gitProfile.userName = d.response.viewer.login;
-      gitUtils.gitApi(`/repos/${gitProfile.userName}/${gitProfile.userName}/contents/README.md`, graphqlToken).then(d => {
+      gitUtils.gitApi(`/repos/${gitProfile.userName}/${gitProfile.userName}/contents/README.md`, gitHubToken).then(d => {
         commitData.sha = d.response.sha;
         commitData.path = d.response.path;
         commitData.repo = gitProfile.userName;
@@ -95,7 +94,7 @@ function initialize() {
 
 function getRepos() {
   return new Promise((resolve, reject) => {
-    gitUtils.gitApiGraphQl(graphqlToken, gitUtils.substitute(repoQuery.list_repos, ['$username', '$id'], [gitProfile.userName, gitProfile.userId]), {}, 'repos').then(d => {
+    gitUtils.gitApiGraphQl(gitHubToken, gitUtils.substitute(repoQuery.list_repos, ['$username', '$id'], [gitProfile.userName, gitProfile.userId]), {}, 'repos').then(d => {
       resolve(d.repos.user.repositories);
     });
   });
@@ -109,17 +108,17 @@ function getStats() {
       prom.push(gitUtils.wakatimeApi(`all_time_since_today?api_key=${wakatimeApiKey}`, 'today'));
     }
     if(showProfile == 'true') {
-      prom.push(gitUtils.gitApi(`repos/${gitProfile.userName}/${gitProfile.userName}/traffic/views?per=week`, graphqlToken, 'traffic'));
+      prom.push(gitUtils.gitApi(`repos/${gitProfile.userName}/${gitProfile.userName}/traffic/views?per=week`, gitHubToken, 'traffic'));
     }
     if(shortInfo == 'true') {
-      prom.push(gitUtils.gitApi(`user`, graphqlToken, 'user'));
-      prom.push(gitUtils.gitApi(`https://github-contributions.now.sh/api/v1/${gitProfile.userName}`, graphqlToken, 'contrib', true));
+      prom.push(gitUtils.gitApi(`user`, gitHubToken, 'user'));
+      prom.push(gitUtils.gitApi(`https://github-contributions.now.sh/api/v1/${gitProfile.userName}`, gitHubToken, 'contrib', true));
     }
     if (showWakaStat == 'true') {
-        prom.push(gitUtils.wakatimeApi(`stats/last_7_days?api_key=${wakatimeApiKey}`, 'userStat'));
+        prom.push(gitUtils.wakatimeApi(`stats/last_30_days?api_key=${wakatimeApiKey}`, 'userStat'));
       }
     if (showCommit == 'true') {
-        prom.push(gitUtils.gitApiGraphQl(graphqlToken, gitUtils.substitute(repoQuery.contributedQuery, '$username', gitProfile.userName), {}, 'contributed'));
+        prom.push(gitUtils.gitApiGraphQl(gitHubToken, gitUtils.substitute(repoQuery.contributedQuery, '$username', gitProfile.userName), {}, 'contributed'));
     }
     Promise.all(prom).then(values => {
       let statistics = '';
@@ -190,7 +189,7 @@ function generateCommitList(repos, stat) {
     }
     const prom =[];
     for (let r of repos) {
-      prom.push(gitUtils.gitApiGraphQl(graphqlToken, gitUtils.substitute(repoQuery.createCommitQuery, ['$owner', '$name', '$id'], [gitProfile.userName, r.name, gitProfile.userId])));
+      prom.push(gitUtils.gitApiGraphQl(gitHubToken, gitUtils.substitute(repoQuery.createCommitQuery, ['$owner', '$name', '$id'], [gitProfile.userName, r.name, gitProfile.userId])));
     }
     Promise.all(prom).then(values => {
       const no_activity = "No Activity Tracked This Week";
@@ -301,7 +300,7 @@ function generateCommitList(repos, stat) {
       if(showProject == 'true') {
         const projects = stat.projects;
         projects.sort(function(a, b) {
-            return a.percent - b.percent;
+            return b.percent - a.percent;
         });
         string = `${string}💻 ***Projects*** \n${ stat.projects.length > 0 ? makeStandardList(projects) : no_activity}\n`;
       }
@@ -367,8 +366,9 @@ function generateNewReadme(readme, stats) {
     string = `${string}⌚ ***Last Stats Update on***\n${last_update.toUTCString()}`;
   }
   const newreadme = await generateNewReadme(readme, string);
-  commitData.content = new Buffer.from(newreadme).toString('base64');
-  const result = await octokit.repos.createOrUpdateFileContents(commitData);
+  // commitData.content = new Buffer.from(newreadme).toString('base64');
+  // const result = await octokit.repos.createOrUpdateFileContents(commitData);
+  console.log(newreadme)
   console.log(`Readme updated ${result.status}`);
   const end_time = new Date;
   console.log(`End on ${end_time.toLocaleString()}`)
