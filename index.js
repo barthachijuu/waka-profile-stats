@@ -7,7 +7,6 @@ const repoQuery = require('./query');
 const {
   WAKATIME_API_KEY: wakatimeApiKey,
   GH_TOKEN: gitHubToken,
-  GQ_TOKEN: graphqlToken,
   SHOW_TOTAL_TIME: showTime,
   SHOW_PROFILE: showProfile,
   SHORT_INFO: shortInfo,
@@ -20,7 +19,6 @@ const {
   SHOW_PROJECTS: showProject,
   SHOW_LANGUAGE_PER_REPO: showLanguagePerRepo,
   SHOW_UPDATE_DATE: showUpdateDate,
-  COMMIT_BY_ME: commitByMe,
   INPUT_COMMIT_MESSAGE: commitMessage,
  } = process.env;
 
@@ -28,6 +26,7 @@ const {
     auth: gitHubToken,
  });
 
+const temaplteTag='```';
 let readme = '';
 let stats = '';
 const date = new Date;
@@ -39,7 +38,7 @@ const gitProfile = {
 }
 
 const commitData = {
-  owner: 'readme-bot',
+  owner: '',
   repo: '',
   message: commitMessage || 'Update Readme with Waka Stats'
 
@@ -51,39 +50,40 @@ function generateBarChart(perc) {
   const empty_block = "░";
   const done_block = "█";
   const mid_block = "▒"
-  return `${(perc /4) < 4 ? mid_block.repeat(1): done_block.repeat((perc /4))}${empty_block.repeat((25 - (perc/4)))}`;
+  return `${(perc /4) < 4 && (perc /4) != 0 ? mid_block.repeat(1) : done_block.repeat((perc /4))}${empty_block.repeat((25 - (perc/4)))}`;
 }
 
 function makeStandardList (list){
-  let string = '';
+  let string = `${temaplteTag}text`;
   for(const l of list){
     let lname = l.name.length;
     let ltext = l.text.length;
-    string = `${string}\n> ${l.name}${(' ').repeat(25 - lname)}${l.text}${(' ').repeat(20 - ltext)}${generateBarChart(l.percent)}   ${Number(l.percent)}%\n>`;
+    string = `${string}\n${l.name}${(' ').repeat(25 - lname)}${l.text}${(' ').repeat(20 - ltext)}${generateBarChart(l.percent)}   ${Number(l.percent)}%\n`;
   }
-  return string.substr(0, string.length - 1);
+  return `${string.substr(0, string.length - 1)}\n${temaplteTag}\n`;
 }
 
 function makeCommitList (list){
-  let string = '';
+  let string = `${temaplteTag}text`;
   for(const l of list){
     let lname = l.name.length;
     let ltext = l.text.length;
-    string = `${string}\n> ${l.name}${(' ').repeat(13 - lname)}${l.text}${(' ').repeat(15 - ltext)}${generateBarChart(l.percent)}   ${Number(l.percent)}%\n>`;
+    string = `${string}\n${l.name}${(' ').repeat(13 - lname)}${l.text}${(' ').repeat(15 - ltext)}${generateBarChart(l.percent)}   ${Number(l.percent)}%\n`;
   }
-  return string.substr(0, string.length - 1);
+  return `${string.substr(0, string.length - 1)}\n${temaplteTag}\n`;
 }
 
 function initialize() {
   return new Promise((resolve, reject) => {
-    gitUtils.gitApiGraphQl(graphqlToken, repoQuery.userInfoQuery).then(d => {
+    gitUtils.gitApiGraphQl(gitHubToken, repoQuery.userInfoQuery).then(d => {
       gitProfile.userId = d.response.viewer.id;
       gitProfile.userEmail = d.response.viewer.email;
       gitProfile.userName = d.response.viewer.login;
-      gitUtils.gitApi(`/repos/${gitProfile.userName}/${gitProfile.userName}/contents/README.md`, graphqlToken).then(d => {
+      gitUtils.gitApi(`/repos/${gitProfile.userName}/${gitProfile.userName}/contents/README.md`, gitHubToken).then(d => {
         commitData.sha = d.response.sha;
         commitData.path = d.response.path;
         commitData.repo = gitProfile.userName;
+        commitData.owner = gitProfile.userName;
         const buff = new Buffer.from(d.response.content, 'base64');
         const rdme = buff.toString('utf-8');
         resolve(rdme)
@@ -94,7 +94,7 @@ function initialize() {
 
 function getRepos() {
   return new Promise((resolve, reject) => {
-    gitUtils.gitApiGraphQl(graphqlToken, gitUtils.substitute(repoQuery.list_repos, ['$username', '$id'], [gitProfile.userName, gitProfile.userId]), {}, 'repos').then(d => {
+    gitUtils.gitApiGraphQl(gitHubToken, gitUtils.substitute(repoQuery.list_repos, ['$username', '$id'], [gitProfile.userName, gitProfile.userId]), {}, 'repos').then(d => {
       resolve(d.repos.user.repositories);
     });
   });
@@ -108,17 +108,17 @@ function getStats() {
       prom.push(gitUtils.wakatimeApi(`all_time_since_today?api_key=${wakatimeApiKey}`, 'today'));
     }
     if(showProfile == 'true') {
-      prom.push(gitUtils.gitApi(`repos/${gitProfile.userName}/${gitProfile.userName}/traffic/views?per=week`, graphqlToken, 'traffic'));
+      prom.push(gitUtils.gitApi(`repos/${gitProfile.userName}/${gitProfile.userName}/traffic/views?per=week`, gitHubToken, 'traffic'));
     }
     if(shortInfo == 'true') {
-      prom.push(gitUtils.gitApi(`user`, graphqlToken, 'user'));
-      prom.push(gitUtils.gitApi(`https://github-contributions.now.sh/api/v1/${gitProfile.userName}`, graphqlToken, 'contrib', true));
+      prom.push(gitUtils.gitApi(`user`, gitHubToken, 'user'));
+      prom.push(gitUtils.gitApi(`https://github-contributions.now.sh/api/v1/${gitProfile.userName}`, gitHubToken, 'contrib', true));
     }
     if (showWakaStat == 'true') {
-        prom.push(gitUtils.wakatimeApi(`stats/last_7_days?api_key=${wakatimeApiKey}`, 'userStat'));
+        prom.push(gitUtils.wakatimeApi(`stats/last_30_days?api_key=${wakatimeApiKey}`, 'userStat'));
       }
     if (showCommit == 'true') {
-        prom.push(gitUtils.gitApiGraphQl(graphqlToken, gitUtils.substitute(repoQuery.contributedQuery, '$username', gitProfile.userName), {}, 'contributed'));
+        prom.push(gitUtils.gitApiGraphQl(gitHubToken, gitUtils.substitute(repoQuery.contributedQuery, '$username', gitProfile.userName), {}, 'contributed'));
     }
     Promise.all(prom).then(values => {
       let statistics = '';
@@ -130,7 +130,7 @@ function getStats() {
           return values[key][Object.keys(el)]
       })
       if(today) {
-        statistics = `![Code Time](http://img.shields.io/badge/Code_Time-${today.text.replace(/\s/g, "%20")}-blue)\n\n`
+        statistics = `![Code Time](http://img.shields.io/badge/Code_Time-${today.text.replace(/\s/g, "%20")}-blue)   `
       }
       if(contrib){
         let contr = 0;
@@ -139,16 +139,15 @@ function getStats() {
             contr = contr + c.total;
           })
         }
-        contribution = `> 🏆 ${contrib.years[0].total} Personal contributions in the last year\n>\n> 🛡️ ${contr} Total contributions when i start a github profile\n>`
+        contribution = `🏆 ${contrib.years[0].total} Personal contributions in the last year\n\n🛡️ ${contr} Total contributions when i start a github profile\n`
       }
       if(traffic) {
         traffics = `![Profile Views](http://img.shields.io/badge/Profile_Views-${traffic.count}-red)\n\n`;
       }
       if(user) {
-        userInfo = `> 💾 ${gitUtils.convertData(user.disk_usage)} Used in Github's Storage\n>\n> ${user.hireable ? 'Not Opted to hire' : '🚫 Not Opted to hire'} \n>\n> 📖 ${user.public_repos} Public repos \n>\n> 🔐 ${user.total_private_repos !== null ? user.total_private_repos : 0} Private repos \n>\n> 🔃 ${user.followers} Followers \n>\n> 🔄 ${user.following} Following \n`;
+        userInfo = `💾 ${gitUtils.convertData(user.disk_usage)} Used in Github's Storage\n\n${user.hireable ? 'Not Opted to hire' : '🚫 Not Opted to hire'}\n\n📖 ${user.public_repos} Public repos \n\n🔐 ${user.total_private_repos !== null ? user.total_private_repos : 0} Private repos \n\n🔃 ${user.followers} Followers \n\n🔄 ${user.following} Following \n`;
       }
-      stats = `${statistics}${traffics}
-**🤓 My Personal GitHub Info** \n\n${contribution.trimLeft()}\n${userInfo}`;
+      stats = `${statistics}${traffics} **🤓 My Personal GitHub Info** \n\n${temaplteTag}properties\n${contribution.trimLeft()}\n${userInfo}\n${temaplteTag}`;
       if(contributed) {
         repos = contributed.user.repositoriesContributedTo.nodes.filter(a => !a.isFork);
       }
@@ -190,7 +189,7 @@ function generateCommitList(repos, stat) {
     }
     const prom =[];
     for (let r of repos) {
-      prom.push(gitUtils.gitApiGraphQl(graphqlToken, gitUtils.substitute(repoQuery.createCommitQuery, ['$owner', '$name', '$id'], [gitProfile.userName, r.name, gitProfile.userId])));
+      prom.push(gitUtils.gitApiGraphQl(gitHubToken, gitUtils.substitute(repoQuery.createCommitQuery, ['$owner', '$name', '$id'], [gitProfile.userName, r.name, gitProfile.userId])));
     }
     Promise.all(prom).then(values => {
       const no_activity = "No Activity Tracked This Week";
@@ -282,7 +281,7 @@ function generateCommitList(repos, stat) {
         };
         let dayWeekTitle;
         for(let d of day_of_week) {
-          if(d.percent > maxElement.percent) {
+          if(Number(d.percent) > Number(maxElement.percent)) {
             maxElement = d;
           }
           dayWeekTitle = `**I do my best effort on** ${maxElement.name}`;
@@ -301,7 +300,7 @@ function generateCommitList(repos, stat) {
       if(showProject == 'true') {
         const projects = stat.projects;
         projects.sort(function(a, b) {
-            return a.percent - b.percent;
+            return b.percent - a.percent;
         });
         string = `${string}💻 ***Projects*** \n${ stat.projects.length > 0 ? makeStandardList(projects) : no_activity}\n`;
       }
@@ -336,14 +335,16 @@ function generateLanguagePerRepo(repos){
       const extension = lang[label].count === 1 ? ' repo' : ' repos';
       data.push({ name: label, text: `${String(lang[label].count)}${extension}`, percent: perc });
     }
-    const string = `***I Mostly Code in***${makeStandardList(data)}\n`;
+    const string = `***I Mostly Code in*** ${mostLanguageRepo} \n${makeStandardList(data)}\n`;
     resolve(string);
   });
 }
 
 function generateNewReadme(readme, stats) {
   return new Promise((resolve, reject) => {
-    const string = readme.replace(START_COMMENT, `${START_COMMENT}\n${stats}`)
+    const regex = new RegExp(`(${START_COMMENT})[^]+(${END_COMMENT})[^*]`);
+    const old = pat = readme.match(regex)[0];
+    const string = readme.replace(old, `${START_COMMENT}\n${stats}\n${END_COMMENT}\n`);
     resolve(string);
   });
 }
@@ -365,14 +366,10 @@ function generateNewReadme(readme, stats) {
     string = `${string}⌚ ***Last Stats Update on***\n${last_update.toUTCString()}`;
   }
   const newreadme = await generateNewReadme(readme, string);
-  if(commitByMe == 'true') {
-    commitData.owner = gitProfile.userName;
-  }
-  if(newreadme != readme) {
-    commitData.content = new Buffer.from(newreadme).toString('base64');
-    const result = await octokit.repos.createOrUpdateFileContents(commitData);
-    console.log(`Readme updated ${result.status}`);
-  }
+  // commitData.content = new Buffer.from(newreadme).toString('base64');
+  // const result = await octokit.repos.createOrUpdateFileContents(commitData);
+  console.log(newreadme)
+  console.log(`Readme updated ${result.status}`);
   const end_time = new Date;
   console.log(`End on ${end_time.toLocaleString()}`)
   console.log(`Program processed in ${Math.round((end_time.getTime() - date.getTime()) / 1000)} seconds\n`)
