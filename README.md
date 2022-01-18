@@ -254,8 +254,7 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 This project is licensed under the MIT license, Copyright (©) 2022 Bartolomeo Amico. For more information see `LICENSE.md`
 
-
-- If ever you are using it right now, please tell me by sending a [Special Mention](https://github.com/bartahachijuu/waka-profile-stats/issues/new/choose) issue :blush: and I will be happy to add you to a list you will see here
+- If ever you are using it right now, please tell me by sending a [Special Mention](https://github.com/barthachijuu/waka-profile-stats/issues/new/choose) issue, and I will be happy to add you to a list you will see here
 
 ## Inspired From
 
