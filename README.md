@@ -256,7 +256,7 @@ This project is licensed under the MIT license, Copyright (©) 2022 Bartolomeo A
 
 
 - If ever you are using it right now, please tell me by sending a [Special Mention](https://github.com/bartahachijuu/waka-profile-stats/issues/new/choose) issue :blush: and I will be happy to add you to a list you will see here
--
+
 ## Inspired From
 
 > [waka-box](https://github.com/matchai/waka-box) <br/>
