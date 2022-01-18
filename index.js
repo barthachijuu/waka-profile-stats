@@ -288,7 +288,8 @@ function generateCommitList(repos, stat) {
         }
         string = `${string}📅 ${dayWeekTitle}\n ${makeCommitList(day_of_week)}\n`;
       }
-      if(showLanguage == 'true') {
+
+      if (showLanguage == 'true' && stat.languages) {
         string = `${string}🏷️ ***Languages*** \n${stat.languages.length > 0 ? makeStandardList(stat.languages) : no_activity}\n`;
       }
       if(showEditors == 'true') {
@@ -366,9 +367,8 @@ function generateNewReadme(readme, stats) {
     string = `${string}⌚ ***Last Stats Update on***\n${last_update.toUTCString()}`;
   }
   const newreadme = await generateNewReadme(readme, string);
-  // commitData.content = new Buffer.from(newreadme).toString('base64');
-  // const result = await octokit.repos.createOrUpdateFileContents(commitData);
-  console.log(newreadme)
+  commitData.content = new Buffer.from(newreadme).toString('base64');
+  const result = await octokit.repos.createOrUpdateFileContents(commitData);
   console.log(`Readme updated ${result.status}`);
   const end_time = new Date;
   console.log(`End on ${end_time.toLocaleString()}`)
