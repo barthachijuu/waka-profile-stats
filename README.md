@@ -238,6 +238,8 @@ Thank you to all our backers! 🙏 Become a backer on [patreon](https://www.patr
 
 ## Contributors ✨
 
+Contributions are welcome! ♥!
+
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -250,4 +252,14 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## License
 
-This project is licensed under the MIT license, Copyright (©) 2020 Bartolomeo Amico. For more information see `LICENSE.md`
+This project is licensed under the MIT license, Copyright (©) 2022 Bartolomeo Amico. For more information see `LICENSE.md`
+
+
+- If ever you are using it right now, please tell me by sending a [Special Mention](https://github.com/bartahachijuu/waka-profile-stats/issues/new/choose) issue :blush: and I will be happy to add you to a list you will see here
+-
+## Inspired From
+
+> [waka-box](https://github.com/matchai/waka-box) <br/>
+> [anmol098/waka-readme-stats](https://github.com/anmol098/waka-readme-stats/)
+
+### This project need a **star** ⭐ from you to get even cooler. 🆒
