@@ -320,7 +320,7 @@ function generateLanguagePerRepo(repos){
         const language = r.node.primaryLanguage.name;
         const color_code = r.node.primaryLanguage.color;
         total += 1;
-        if(language in Object.keys(lang) === false) {
+        if(lang.hasOwnProperty(language) === false) {
           lang[language] = {};
           lang[language]['count'] = 1
         } else {
